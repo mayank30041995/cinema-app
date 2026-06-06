@@ -17,7 +17,7 @@ locals {
     Environment = terraform.workspace
     Project     = var.project
     ManageBy    = "Terraform"
-    Owner = "Mayank"
+    Owner       = "Mayank"
   }
 }
 

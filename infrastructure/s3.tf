@@ -10,6 +10,35 @@ resource "aws_s3_bucket" "cinema_app_s3_bucket" {
   tags = local.common_tags
 }
 
+resource "aws_s3_bucket_server_side_encryption_configuration" "cinema_app_bucket_encryption" {
+  bucket = aws_s3_bucket.cinema_app_s3_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "cinema_app_lifecycle" {
+  bucket = aws_s3_bucket.cinema_app_s3_bucket.id
+
+  rule {
+    id     = "cleanup-old-versions"
+    status = "Enabled"
+
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
 # resource "aws_s3_bucket_acl" "cinema_app_bucket_acl" {
 #   bucket = aws_s3_bucket.cinema_app_s3_bucket.id
 #   acl    = "private"
