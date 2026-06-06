@@ -65,30 +65,43 @@ resource "aws_s3_bucket_policy" "cinema_app_bucket_policy" {
   policy = data.aws_iam_policy_document.cinema_app_bucket_policy_document.json
 }
 
-resource "aws_s3_bucket_website_configuration" "cinema_app_bucket_website" {
-  bucket = aws_s3_bucket.cinema_app_s3_bucket.id
+# resource "aws_s3_bucket_website_configuration" "cinema_app_bucket_website" {
+#   bucket = aws_s3_bucket.cinema_app_s3_bucket.id
 
-  index_document {
-    suffix = "index.html"
-  }
+#   index_document {
+#     suffix = "index.html"
+#   }
 
-  error_document {
-    key = "index.html"
-  }
-}
+#   error_document {
+#     key = "index.html"
+#   }
+# }
 
 data "aws_iam_policy_document" "cinema_app_bucket_policy_document" {
+
   statement {
-    actions = ["s3:GetObject"]
+    actions = [
+      "s3:GetObject"
+    ]
 
     resources = [
-      aws_s3_bucket.cinema_app_s3_bucket.arn,
       "${aws_s3_bucket.cinema_app_s3_bucket.arn}/*"
     ]
 
     principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.cinema_app_origin_access.iam_arn]
+      type = "Service"
+      identifiers = [
+        "cloudfront.amazonaws.com"
+      ]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+
+      values = [
+        aws_cloudfront_distribution.s3_distribution.arn
+      ]
     }
   }
 }
