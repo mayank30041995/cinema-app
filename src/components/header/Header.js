@@ -154,6 +154,7 @@ const Header = (props) => {
           <div className="header-navbar">
             <div className="header-image" onClick={() => navigateToMainPage()}>
               <img src={logo} alt="" />
+              <img src={logo} alt="" />
             </div>
             <div
               className={`${menuClass ? 'header-menu-toggle is-active' : 'header-menu-toggle'}`}
