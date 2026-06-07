@@ -15,9 +15,9 @@ steps:
   - node/install-packages
 
   - run:
-    name: Create Environment File
-    command: |
-      echo "REACT_APP_API_SECRET=$REACT_APP_API_SECRET" > .env
+      name: Create Environment File
+      command: |
+        echo "REACT_APP_API_SECRET=$REACT_APP_API_SECRET" > .env
 
   - run:
       name: Build React App
