@@ -14,14 +14,19 @@ jobs:
       - node/install-packages
 
       - run:
-          name: Create Environment File
+          name: Debug API Key (safe check)
           command: |
-            echo "REACT_APP_API_SECRET=$REACT_APP_API_SECRET" > .env
+            if [ -z "$REACT_APP_API_SECRET" ]; then
+              echo "❌ REACT_APP_API_SECRET is NOT set"
+              exit 1
+            else
+              echo "✅ REACT_APP_API_SECRET is set"
+            fi
 
       - run:
           name: Build React App
           command: |
-            npm run build
+            REACT_APP_API_SECRET=$REACT_APP_API_SECRET npm run build
 
       - run:
           name: Install AWS CLI
