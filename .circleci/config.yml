@@ -1,53 +1,51 @@
 version: 2.1
 
 orbs:
-node: circleci/node@5.1.0
+  node: circleci/node@5.1.0
 
 jobs:
-build-and-deploy:
-docker:
-- image: cimg/node:20.11
+  build-and-deploy:
+    docker:
+      - image: cimg/node:20.11
 
-```
-steps:
-  - checkout
+    steps:
+      - checkout
 
-  - node/install-packages
+      - node/install-packages
 
-  - run:
-      name: Create Environment File
-      command: |
-        echo "REACT_APP_API_SECRET=$REACT_APP_API_SECRET" > .env
+      - run:
+          name: Create Environment File
+          command: |
+            echo "REACT_APP_API_SECRET=$REACT_APP_API_SECRET" > .env
 
-  - run:
-      name: Build React App
-      command: |
-        npm run build
+      - run:
+          name: Build React App
+          command: |
+            npm run build
 
-  - run:
-      name: Install AWS CLI
-      command: |
-        sudo apt-get update
-        sudo apt-get install -y awscli
+      - run:
+          name: Install AWS CLI
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y awscli
 
-  - run:
-      name: Deploy to S3
-      command: |
-        aws s3 sync build/ s3://$S3_BUCKET --delete
+      - run:
+          name: Deploy to S3
+          command: |
+            aws s3 sync build/ s3://$S3_BUCKET --delete
 
-  - run:
-      name: Invalidate CloudFront Cache
-      command: |
-        aws cloudfront create-invalidation \
-          --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
-          --paths "/*"
-```
+      - run:
+          name: Invalidate CloudFront Cache
+          command: |
+            aws cloudfront create-invalidation \
+              --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
+              --paths "/*"
 
 workflows:
-deploy:
-jobs:
-- build-and-deploy:
-filters:
-branches:
-only:
-- main
+  deploy:
+    jobs:
+      - build-and-deploy:
+          filters:
+            branches:
+              only:
+                - main
