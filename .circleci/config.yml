@@ -1,58 +1,51 @@
 version: 2.1
 
-orbs:
-  node: circleci/node@5.1.0
-
 jobs:
-  build-and-deploy:
+  deploy:
     docker:
-      - image: cimg/node:20.19
+      - image: cimg/node:20.18
 
     steps:
       - checkout
 
-      - node/install-packages
-
-      - run:
-          name: Debug API Key (safe check)
-          command: |
-            if [ -z "$REACT_APP_API_SECRET" ]; then
-              echo "❌ REACT_APP_API_SECRET is NOT set"
-              exit 1
-            else
-              echo "✅ REACT_APP_API_SECRET is set"
-            fi
-
-      - run:
-          name: Build React App
-          command: |
-            REACT_APP_API_SECRET=$REACT_APP_API_SECRET npm run build
-
       - run:
           name: Install AWS CLI
           command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
-            unzip awscliv2.zip
-            sudo ./aws/install
-            aws --version
+            sudo apt update
+            sudo apt install -y awscli
 
       - run:
-          name: Deploy to S3
+          name: Configure AWS via OIDC
           command: |
-            aws s3 sync build/ s3://$S3_BUCKET --delete
+            mkdir -p ~/.aws
+
+            echo "${CIRCLE_OIDC_TOKEN}" > /tmp/token
+
+            cat > ~/.aws/config <<EOF
+            [profile oidc]
+            role_arn=arn:aws:iam::930767549449:role/circleci-cinema-deploy
+            web_identity_token_file=/tmp/token
+            region=${AWS_REGION}
+            EOF
+
+            echo 'export AWS_PROFILE=oidc' >> $BASH_ENV
+            source $BASH_ENV
+
+            aws sts get-caller-identity
 
       - run:
-          name: Invalidate CloudFront Cache
+          name: Deploy
           command: |
+            npm ci
+            npm run build
+
+            aws s3 sync build/ s3://${S3_BUCKET} --delete
+
             aws cloudfront create-invalidation \
-              --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
+              --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} \
               --paths "/*"
 
 workflows:
   deploy:
     jobs:
-      - build-and-deploy:
-          filters:
-            branches:
-              only:
-                - main
+      - deploy
