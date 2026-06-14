@@ -21,12 +21,7 @@ jobs:
 
             echo "${CIRCLE_OIDC_TOKEN}" > /tmp/token
 
-            cat > ~/.aws/config <<EOF
-            [profile oidc]
-            role_arn=arn:aws:iam::930767549449:role/circleci-cinema-deploy
-            web_identity_token_file=/tmp/token
-            region=${AWS_REGION}
-            EOF
+            printf "[profile oidc]\nrole_arn=arn:aws:iam::930767549449:role/circleci-cinema-deploy\nweb_identity_token_file=/tmp/token\nregion=%s\n" "$AWS_REGION" > ~/.aws/config
 
             echo 'export AWS_PROFILE=oidc' >> $BASH_ENV
             source $BASH_ENV
