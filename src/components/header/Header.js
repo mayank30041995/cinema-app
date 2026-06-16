@@ -181,7 +181,7 @@ const Header = (props) => {
               <input
                 className={`search-input ${disableSearch ? 'disabled' : ''}`}
                 type="text"
-                placeholder="Search for a movie after OIDC"
+                placeholder="Search for a movie after OIDC  Terraform"
                 value={search}
                 onChange={onSearchChange}
               />

@@ -33,13 +33,13 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     target_origin_id       = aws_s3_bucket.cinema_app_s3_bucket.id
     viewer_protocol_policy = "redirect-to-https"
 
-    compress    = true
+    compress = true
 
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
 
-    min_ttl     = 0
-    default_ttl = 300
-    max_ttl     = 300
+    # min_ttl     = 0
+    # default_ttl = 300
+    # max_ttl     = 300
 
     # forwarded_values {
     #   query_string = true
